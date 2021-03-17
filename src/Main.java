@@ -5,9 +5,11 @@ import java.util.List;
 public class Main {
     public static void main(String[] args) {
         try {
-            DataSet dataSet = null;
-            dataSet = new DataSet("binpack1d_00.txt");
-            Solution solution = Solution.firstFitDecreasing(dataSet);
+            DataSet dataSet = new DataSet("binpack1d_00.txt");
+
+            // Solution solution = SolutionBuilder.firstFitSorted(dataSet);
+            // Solution solution = SolutionBuilder.oneItemPerBin(dataSet);
+            Solution solution = SolutionBuilder.firstFit(dataSet);
 
             System.out.println("Bin capacity: " + dataSet.getBinCapacity());
             System.out.println("Item count: " + dataSet.getItems().size());

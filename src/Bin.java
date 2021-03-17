@@ -13,6 +13,7 @@ public class Bin {
     public void add(Item item) {
         this.items.add(item);
     }
+    public void remove(Item item) {this.items.remove(item);}
     public int size() {
         return items.size();
     }

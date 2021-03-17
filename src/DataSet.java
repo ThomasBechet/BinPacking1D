@@ -37,9 +37,9 @@ public class DataSet {
         System.out.println("File parsed : " + filename);
     }
 
-    public DataSet(List<Item> items, int binCapacity) {
-        this.items = items;
-        this.binCapacity = binCapacity;
+    public DataSet(DataSet dataSet) {
+        this.items = new ArrayList<>(dataSet.getItems());
+        this.binCapacity = dataSet.getBinCapacity();
     }
 
     public int getLowerBound() {
@@ -50,9 +50,9 @@ public class DataSet {
 
         if(size % this.binCapacity == 0) {
             return size / this.binCapacity;
+        } else {
+            return (size / this.binCapacity) + 1;
         }
-
-        return (size / this.binCapacity) + 1;
     }
 
     public int getUpperBound() {
