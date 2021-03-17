@@ -3,9 +3,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DataSet {
-    public List<Item> items = new ArrayList<>();
-    public int binSize;
-    public int itemCount;
+    private List<Item> items;
+    private int binCapacity;
+
+    public int getBinCapacity() {
+        return this.binCapacity;
+    }
+
+    public List<Item> getItems() {
+        return this.items;
+    }
 
     public DataSet(String filename) throws IOException {
         File file = new File("data/" + filename);
@@ -17,12 +24,11 @@ public class DataSet {
             if(index == 0) {
                 String[] firstData = data.split("\\s+");
                 if(firstData.length > 1) {
-                    binSize = Integer.parseInt(firstData[0]);
-                    itemCount = Integer.parseInt(firstData[1]);
+                    this.binCapacity = Integer.parseInt(firstData[0]);
+                    this.items = new ArrayList<>(Integer.parseInt(firstData[1]));
                 }
-            }
-            else {
-                items.add(new Item(Integer.parseInt(data)));
+            } else {
+                this.items.add(new Item(Integer.parseInt(data)));
             }
 
             index++;
@@ -31,9 +37,9 @@ public class DataSet {
         System.out.println("File parsed : " + filename);
     }
 
-    public DataSet(List<Item> items, int binSize) {
+    public DataSet(List<Item> items, int binCapacity) {
         this.items = items;
-        this.binSize = binSize;
+        this.binCapacity = binCapacity;
     }
 
     public int getLowerBound() {
@@ -42,11 +48,11 @@ public class DataSet {
             size += item.getValue();
         }
 
-        if(size % binSize == 0) {
-            return size / binSize;
+        if(size % this.binCapacity == 0) {
+            return size / this.binCapacity;
         }
 
-        return (size / binSize) + 1;
+        return (size / this.binCapacity) + 1;
     }
 
     public int getUpperBound() {
