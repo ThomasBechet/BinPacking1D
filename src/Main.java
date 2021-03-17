@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -5,13 +6,14 @@ public class Main {
     public static void main(String[] args) {
         System.out.println("Start");
 
-        List<Item> items = new ArrayList<>();
-        items.add(new Item(8));
-        items.add(new Item(7));
-        items.add(new Item(3));
-        items.add(new Item(2));
+        DataSet dataSet = null;
+        try {
+            dataSet = new DataSet("binpack1d_00.txt");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-        DataSet dataSet = new DataSet(items, 10);
+        assert(dataSet != null);
 
 
         List<Solution> solutions = new ArrayList<>();
