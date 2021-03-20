@@ -1,7 +1,4 @@
-import javax.xml.crypto.Data;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 public class SolutionBuilder {
 
@@ -11,13 +8,13 @@ public class SolutionBuilder {
      * @return the generated solution.
      */
     static Solution firstFit(DataSet dataSet) {
-        List<Bin> bins = new ArrayList<>();
+        Solution solution = new Solution();
 
         // Add items to the solution
         for (Item item : dataSet.getItems()) {
             assert!(item.getValue() <= dataSet.getBinCapacity());
             boolean binFound = false;
-            for (Bin bin : bins) {
+            for (Bin bin : solution.getBins()) {
                 if (item.getValue() <= bin.getRemainingLength()) {
                     bin.add(item);
                     binFound = true;
@@ -28,11 +25,11 @@ public class SolutionBuilder {
             if (!binFound) {
                 Bin newBin = new Bin(dataSet.getBinCapacity());
                 newBin.add(item);
-                bins.add(newBin);
+                solution.add(newBin);
             }
         }
 
-        return new Solution(bins);
+        return solution;
     }
 
     /**
@@ -54,14 +51,14 @@ public class SolutionBuilder {
      * @return the generated solution.
      */
     static Solution oneItemPerBin(DataSet dataSet) {
-        List<Bin> bins = new ArrayList<>(dataSet.getItems().size());
+        Solution solution = new Solution();
 
         for (Item item : dataSet.getItems()) {
             Bin bin = new Bin(dataSet.getBinCapacity());
             bin.add(item);
-            bins.add(bin);
+            solution.add(bin);
         }
 
-        return new Solution(bins);
+        return solution;
     }
 }
