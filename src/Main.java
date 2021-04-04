@@ -17,6 +17,7 @@ public class Main {
             System.out.println("Lower Bound: " + dataSet.getLowerBound());
             System.out.println("Upper Bound: " + dataSet.getUpperBound());
             System.out.println("Fitness: " + solution.fitness());
+            System.out.println("Bin count: " + solution.getBins().size());
             /*int binIndex = 1;
             for (Bin bin : solution.getBins()) {
                 System.out.print("(" + binIndex + ") ");
@@ -41,6 +42,7 @@ public class Main {
                 }
             }
             System.out.println("New Fitness: " + bestSolution.fitness());
+            System.out.println("New Bin count: " + solution.getBins().size());
 
         } catch (IOException e) {
             e.printStackTrace();

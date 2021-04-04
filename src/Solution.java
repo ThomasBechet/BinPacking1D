@@ -22,7 +22,15 @@ public class Solution {
     }
 
     public int fitness() {
-        return this.bins.size();
+        int sum = 0;
+        for (Bin bin : this.bins) {
+            int binSum = 0;
+            for (Item item : bin.getItems()) {
+                binSum += item.getValue();
+            }
+            sum += (binSum * binSum);
+        }
+        return sum;
     }
 
     public void add(Bin bin) {
@@ -43,14 +51,13 @@ public class Solution {
             Solution solution = new Solution(this);
 
             try {
-                /*if (rng.nextInt() % 2 == 0) {
-
-                } else {
+                if (rng.nextInt() % 2 == 0) {
                     (new SolutionMoveOperator()).apply(solution, rng);
+                } else {
                     (new SolutionSwapOperator()).apply(solution, rng);
-                }*/
+                }
 
-                (new SolutionMoveOperator()).apply(solution, rng);
+                //(new SolutionMoveOperator()).apply(solution, rng);
 
                 neighbours.add(solution);
                 validSolutions++;
