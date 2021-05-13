@@ -17,6 +17,11 @@ public class Solution {
         }
     }
 
+    @Override
+    public String toString() {
+        return "fitness: " + fitness() + " bin count: " + this.bins.size();
+    }
+
     public List<Bin> getBins() {
         return bins;
     }
@@ -57,8 +62,6 @@ public class Solution {
                     (new SolutionSwapOperator()).apply(solution, rng);
                 }
 
-                //(new SolutionMoveOperator()).apply(solution, rng);
-
                 neighbours.add(solution);
                 validSolutions++;
             } catch (UnsupportedOperationException e) {
@@ -66,7 +69,7 @@ public class Solution {
             }
         }
 
-        System.out.println(validSolutions + "/" + count + " operators");
+//        System.out.println(validSolutions + "/" + count + " operators");
 
         return neighbours;
     }

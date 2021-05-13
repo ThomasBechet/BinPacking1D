@@ -46,7 +46,25 @@ public class SolutionMoveOperator implements SolutionOperator {
 
         // Check operator failure
         if (this.movedItem == null) {
-            throw new UnsupportedOperationException();
+            // Create a new empty bin
+            Bin bin = new Bin(solution.getBins().get(0).getCapacity());
+
+            // Pick random bin
+            Bin sourceBin = solution.getBins().get(rng.nextInt(solution.getBins().size()));
+
+            // Pick random item
+            Item item = sourceBin.getItems().get(rng.nextInt(sourceBin.getItems().size()));
+
+            // Move the item
+            bin.add(item);
+            sourceBin.remove(item);
+
+            // Check source bin empty
+            if (sourceBin.size() == 0) {
+                solution.remove(sourceBin);
+            }
+            solution.add(bin);
+            return;
         }
 
         // Move item
