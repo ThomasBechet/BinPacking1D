@@ -5,6 +5,7 @@ import java.util.Random;
 
 public class Solution {
     private List<Bin> bins;
+    private SolutionOperator lastOperator;
 
     public Solution() {
         this.bins = new ArrayList<>();
@@ -15,11 +16,16 @@ public class Solution {
         for (Bin bin : solution.bins) {
             this.bins.add(new Bin(bin));
         }
+        this.lastOperator = solution.lastOperator;
     }
 
     @Override
     public String toString() {
         return "fitness: " + fitness() + " bin count: " + this.bins.size();
+    }
+
+    public SolutionOperator getLastOperator() {
+        return this.lastOperator;
     }
 
     public List<Bin> getBins() {
@@ -56,11 +62,15 @@ public class Solution {
             Solution solution = new Solution(this);
 
             try {
+                SolutionOperator operator;
                 if (rng.nextInt() % 2 == 0) {
-                    (new SolutionMoveOperator()).apply(solution, rng);
+                    operator = new SolutionMoveOperator();
                 } else {
-                    (new SolutionSwapOperator()).apply(solution, rng);
+                    operator = new SolutionSwapOperator();
                 }
+
+                operator.apply(solution, rng);
+                solution.lastOperator = operator;
 
                 neighbours.add(solution);
                 validSolutions++;

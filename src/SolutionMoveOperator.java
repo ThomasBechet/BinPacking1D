@@ -79,9 +79,9 @@ public class SolutionMoveOperator implements SolutionOperator {
     public boolean equals(SolutionOperator operator) {
         if (operator instanceof SolutionMoveOperator) {
             SolutionMoveOperator op = (SolutionMoveOperator)operator;
-            return this.sourceBin == op.sourceBin &&
-                    this.targetBin == op.targetBin &&
-                    this.movedItem == op.movedItem;
+            boolean sameBins0 = (this.sourceBin == op.sourceBin) && (this.targetBin == op.targetBin);
+            boolean sameBins1 = (this.sourceBin == op.targetBin) && (this.targetBin == op.sourceBin);
+            return (sameBins0 || sameBins1) && this.movedItem == op.movedItem;
         }
         return false;
     }

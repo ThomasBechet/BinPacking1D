@@ -37,25 +37,43 @@ public class Main {
 //            e.printStackTrace();
 //        }
 
-            try {
-                DataSet dataSet = new DataSet("binpack1d_11.txt");
-                Solution firstSolution = SolutionBuilder.oneItemPerBin(dataSet);
-                System.out.println("before " + firstSolution);
-                Random rng = new Random(12345);
-                SolutionBuilder.RecuitSimuleParameters parameters = new SolutionBuilder.RecuitSimuleParameters();
-                parameters.initialTemperature        = 200.0f;
-                parameters.temperatureDecreaseFactor = 0.98f;
-                parameters.temperatureChangeCount    = 50;
-                parameters.iterationPerTemperature   = 15;
-                parameters.generatedNeighbours       = 300;
-                Solution rsSolution = SolutionBuilder.findBestSolutionRecuitSimule(firstSolution, rng, parameters);
-                System.out.println("after " + rsSolution);
-                System.out.println("first fit " + SolutionBuilder.firstFit(dataSet));
-                System.out.println("first fit sorted " + SolutionBuilder.firstFitSorted(dataSet));
-                System.out.println(dataSet.getLowerBound() + " " + dataSet.getUpperBound());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+//        try {
+//            DataSet dataSet = new DataSet("binpack1d_13.txt");
+//            Solution firstSolution = SolutionBuilder.oneItemPerBin(dataSet);
+//            System.out.println("before " + firstSolution);
+//            Random rng = new Random(12345);
+//            SolutionBuilder.RecuitSimuleParameters parameters = new SolutionBuilder.RecuitSimuleParameters();
+//            parameters.initialTemperature        = 200.0f;
+//            parameters.temperatureDecreaseFactor = 0.98f;
+//            parameters.temperatureChangeCount    = 50;
+//            parameters.iterationPerTemperature   = 15;
+//            parameters.neighbourCount            = 300;
+//            Solution rsSolution = SolutionBuilder.findBestSolutionRecuitSimule(firstSolution, rng, parameters);
+//            System.out.println("after " + rsSolution);
+//            System.out.println("first fit " + SolutionBuilder.firstFit(dataSet));
+//            System.out.println("first fit sorted " + SolutionBuilder.firstFitSorted(dataSet));
+//            System.out.println(dataSet.getLowerBound() + " " + dataSet.getUpperBound());
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+
+        try {
+            DataSet dataSet = new DataSet("binpack1d_00.txt");
+            Solution firstSolution = SolutionBuilder.oneItemPerBin(dataSet);
+            System.out.println("before " + firstSolution);
+            Random rng = new Random(12345);
+            SolutionBuilder.TabuSearchParameters parameters = new SolutionBuilder.TabuSearchParameters();
+            parameters.iterationCount = 1000;
+            parameters.queueLength    = 5;
+            parameters.neighbourCount = 100;
+            Solution rsSolution = SolutionBuilder.findBestSolutionTabuSearch(firstSolution, rng, parameters);
+            System.out.println("after " + rsSolution);
+            System.out.println("first fit " + SolutionBuilder.firstFit(dataSet));
+            System.out.println("first fit sorted " + SolutionBuilder.firstFitSorted(dataSet));
+            System.out.println(dataSet.getLowerBound() + " " + dataSet.getUpperBound());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
 //        try {
 //            DataSet dataSet = new DataSet("binpack1d_02.txt");

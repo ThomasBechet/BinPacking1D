@@ -1,6 +1,4 @@
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class SolutionBuilder {
 
@@ -69,7 +67,7 @@ public class SolutionBuilder {
         public float temperatureDecreaseFactor;
         public int temperatureChangeCount;
         public int iterationPerTemperature;
-        public int generatedNeighbours;
+        public int neighbourCount;
     }
 
     /**
@@ -84,7 +82,7 @@ public class SolutionBuilder {
         float u  = parameters.temperatureDecreaseFactor; // temperature decrease u < 1
         int n1   = parameters.temperatureChangeCount;    // n1 changes of temperature
         int n2   = parameters.iterationPerTemperature;   // n2 moves at temperature tk
-        int nc   = parameters.generatedNeighbours;       // number of generated neighbours
+        int nc   = parameters.neighbourCount;            // number of generated neighbours
 
         Solution x    = solution;       // current solution
         Solution xmax = x;              // best solution
@@ -113,6 +111,61 @@ public class SolutionBuilder {
             tk *= u; // Decrease temperature
             System.out.println(fmax + " " + tk);
         }
+        return xmax;
+    }
+
+    public static class TabuSearchParameters {
+        public int iterationCount;
+        public int queueLength;
+        public int neighbourCount;
+    }
+
+    /**
+     * Find a better solution using the 'Tabu Search' algorithm.
+     * @param solution Initial solution
+     * @param rng Pseudo random generator
+     * @param parameters algorithm parameters
+     * @return the generated solution.
+     */
+    static Solution findBestSolutionTabuSearch(Solution solution, Random rng, TabuSearchParameters parameters) {
+        int iterationCount = parameters.iterationCount;
+        int queueLength    = parameters.queueLength;
+        int neighbourCount = parameters.neighbourCount;
+
+        Solution x    = solution;       // current solution
+        Solution xmax = x;              // best solution
+        int fmax      = xmax.fitness(); // best fitness
+        Deque<SolutionOperator> tabuQueue = new LinkedList<>();
+        for (int i = 0; i < iterationCount; i++) {
+            List<Solution> neighbours = x.generateNeighbours(neighbourCount, rng);
+            Collections.sort(neighbours, (a, b) -> {return b.fitness() - a.fitness();});
+
+            // find best neighbour with its operator not in the tabu queue
+            for (Solution neighbour : neighbours) {
+                SolutionOperator nop = neighbour.getLastOperator();
+                if (!tabuQueue.stream().anyMatch((o) -> o.equals(nop))) {
+
+                    // add operator to the tabu queue
+                    tabuQueue.addFirst(nop);
+
+                    // update the tabu queue
+                    if (tabuQueue.size() > queueLength) {
+                        tabuQueue.removeLast();
+                    }
+
+                    // save the neighbour if it is the best
+                    x = neighbour;
+                    int fx = x.fitness();
+                    if (fx > fmax) {
+                        xmax = x;
+                        fmax = fx;
+                    }
+
+                    break;
+                }
+            }
+        }
+
         return xmax;
     }
 }

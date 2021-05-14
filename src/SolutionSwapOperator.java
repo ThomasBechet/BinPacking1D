@@ -84,10 +84,13 @@ public class SolutionSwapOperator implements SolutionOperator {
     public boolean equals(SolutionOperator operator) {
         if (operator instanceof SolutionSwapOperator) {
             SolutionSwapOperator op = (SolutionSwapOperator)operator;
-            return this.firstBin == op.firstBin &&
-                    this.secondBin == op.secondBin &&
-                    this.firstItem == op.firstItem &&
-                    this.secondItem == op.secondItem;
+
+            boolean sameBins0 = (this.firstBin == op.firstBin) && (this.secondBin == op.secondBin);
+            boolean sameBins1 = (this.firstBin == op.secondBin) && (this.secondBin == op.firstBin);
+            boolean sameItem0 = (this.firstItem == op.firstItem) && (this.secondItem == op.secondItem);
+            boolean sameItem1 = (this.firstItem == op.secondItem) && (this.secondItem == op.firstItem);
+
+            return (sameBins0 || sameBins1) && (sameItem0 || sameItem1);
         }
         return false;
     }
