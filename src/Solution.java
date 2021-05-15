@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Random;
 
 public class Solution {
-    private List<Bin> bins;
+    private final List<Bin> bins;
     private SolutionOperator lastOperator;
 
     public Solution() {

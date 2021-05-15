@@ -1,3 +1,6 @@
+import lpsolve.LpSolve;
+import lpsolve.LpSolveException;
+
 import java.util.*;
 
 public class SolutionBuilder {
@@ -7,7 +10,7 @@ public class SolutionBuilder {
      * @param dataSet Entry dataset.
      * @return the generated solution.
      */
-    static Solution firstFit(DataSet dataSet) {
+    public static Solution firstFit(DataSet dataSet) {
         Solution solution = new Solution();
 
         // Add items to the solution
@@ -32,15 +35,107 @@ public class SolutionBuilder {
         return solution;
     }
 
+    public static Solution findBestSolutionLpSolve(DataSet dataSet) {
+        int nbItem = dataSet.getItems().size();
+        int nbBin = nbItem;
+        int totalVariable = nbItem * nbBin + nbBin;
+        try {
+            // create a problem with 4 variables and 0 constraints
+            LpSolve solver = LpSolve.makeLp(nbItem + nbBin, totalVariable);
+
+            // add constraints
+
+            // bins constraints
+            for (int j = 0; j < nbBin; j++) {
+                String constraint = "";
+                for(int i = 0; i < nbItem * nbBin; i++) {
+                    if (i % nbItem == j) {
+                        constraint += dataSet.getItems().get(i / nbItem).getValue() + " ";
+                    } else {
+                        constraint += "0 ";
+                    }
+                }
+                for (int i = 0; i < nbBin; i++) {
+                    if (i == j) {
+                        constraint += "-" + dataSet.getBinCapacity() + " ";
+                    } else {
+                        constraint += "0 ";
+                    }
+                }
+                System.out.println(constraint);
+                solver.strAddConstraint(constraint, LpSolve.LE, 0);
+            }
+
+            System.out.println();
+
+            // items constraints
+            for (int i = 0; i < nbItem; i++) {
+                String constraint = "";
+
+                for(int j = 0; j < nbItem * nbBin; j++) {
+                    if (j / nbItem == i) {
+                        constraint += "1 ";
+                    } else {
+                        constraint += "0 ";
+                    }
+                }
+
+                for(int j = 0; j < nbBin; j++) {
+                    constraint += "0 ";
+                }
+
+                System.out.println(constraint);
+                solver.strAddConstraint(constraint, LpSolve.EQ, 1);
+            }
+
+            System.out.println();
+
+            // set objective function
+            solver.setMinim();
+            String constraint = "";
+            for(int i = 0; i < nbItem * nbBin; i++) {
+                constraint += "0 ";
+            }
+            for(int i = nbItem * nbBin; i < totalVariable; i++) {
+                constraint += "1 ";
+            }
+            System.out.println(constraint);
+            solver.strSetObjFn(constraint);
+
+            // set all variables types to binary
+            for(int i = 0; i < nbItem * nbBin + nbBin; i++) {
+                solver.setBinary(1 + i,true);
+            }
+
+            // solve the problem
+            solver.solve();
+
+            // print solution
+            System.out.println("Value of objective function: " + (int)solver.getObjective());
+            double[] var = solver.getPtrVariables();
+            for (int i = 0; i < var.length; i++) {
+                System.out.println("Value of var[" + i + "] = " + var[i]);
+            }
+
+            // delete the problem and free memory
+            solver.deleteLp();
+        }
+        catch (LpSolveException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
     /**
      * Generate a solution with the 'FirstFit' method.
      * @param dataSet Entry dataset.
      * @return the generated solution.
      */
-    static Solution firstFitSorted(DataSet dataSet) {
+    public static Solution firstFitSorted(DataSet dataSet) {
         // Create new sorted
         DataSet sortedDataSet = new DataSet(dataSet);
-        Collections.sort(sortedDataSet.getItems(), (a, b) -> {return b.getValue() - a.getValue();});
+        sortedDataSet.getItems().sort((a, b) -> b.getValue() - a.getValue());
 
         return SolutionBuilder.firstFit(sortedDataSet);
     }
@@ -50,7 +145,7 @@ public class SolutionBuilder {
      * @param dataSet Entry dataset.
      * @return the generated solution.
      */
-    static Solution oneItemPerBin(DataSet dataSet) {
+    public static Solution oneItemPerBin(DataSet dataSet) {
         Solution solution = new Solution();
 
         for (Item item : dataSet.getItems()) {
@@ -77,7 +172,7 @@ public class SolutionBuilder {
      * @param parameters algorithm parameters
      * @return the generated solution.
      */
-    static Solution findBestSolutionRecuitSimule(Solution solution, Random rng, RecuitSimuleParameters parameters) {
+    public static Solution findBestSolutionRecuitSimule(Solution solution, Random rng, RecuitSimuleParameters parameters) {
         float tk = parameters.initialTemperature;        // initial temperature
         float u  = parameters.temperatureDecreaseFactor; // temperature decrease u < 1
         int n1   = parameters.temperatureChangeCount;    // n1 changes of temperature
@@ -127,7 +222,7 @@ public class SolutionBuilder {
      * @param parameters algorithm parameters
      * @return the generated solution.
      */
-    static Solution findBestSolutionTabuSearch(Solution solution, Random rng, TabuSearchParameters parameters) {
+    public static Solution findBestSolutionTabuSearch(Solution solution, Random rng, TabuSearchParameters parameters) {
         int iterationCount = parameters.iterationCount;
         int queueLength    = parameters.queueLength;
         int neighbourCount = parameters.neighbourCount;
@@ -138,12 +233,12 @@ public class SolutionBuilder {
         Deque<SolutionOperator> tabuQueue = new LinkedList<>();
         for (int i = 0; i < iterationCount; i++) {
             List<Solution> neighbours = x.generateNeighbours(neighbourCount, rng);
-            Collections.sort(neighbours, (a, b) -> {return b.fitness() - a.fitness();});
+            neighbours.sort((a, b) -> b.fitness() - a.fitness());
 
             // find best neighbour with its operator not in the tabu queue
             for (Solution neighbour : neighbours) {
                 SolutionOperator nop = neighbour.getLastOperator();
-                if (!tabuQueue.stream().anyMatch((o) -> o.equals(nop))) {
+                if (tabuQueue.stream().noneMatch((o) -> o.equals(nop))) {
 
                     // add operator to the tabu queue
                     tabuQueue.addFirst(nop);
