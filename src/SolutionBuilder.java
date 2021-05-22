@@ -1,6 +1,7 @@
 import lpsolve.LpSolve;
 import lpsolve.LpSolveException;
 
+import java.io.PrintWriter;
 import java.util.*;
 
 public class SolutionBuilder {
@@ -163,6 +164,7 @@ public class SolutionBuilder {
         public int temperatureChangeCount;
         public int iterationPerTemperature;
         public int neighbourCount;
+        public PrintWriter recorder;
     }
 
     /**
@@ -184,11 +186,16 @@ public class SolutionBuilder {
         int fmax      = xmax.fitness(); // best fitness
 
         for (int k = 0; k < n1; k++) {
-            for (int l = 1; l < n2; l++) {
+            for (int l = 0; l < n2; l++) {
                 List<Solution> neighbours = x.generateNeighbours(nc, rng); // Generate neighbours
                 Solution y = neighbours.get(rng.nextInt(neighbours.size())); // Pick one of the neighbours
                 int fx = x.fitness();
                 int fy = y.fitness();
+
+                if (parameters.recorder != null) {
+                    parameters.recorder.println(fy);
+                }
+
                 float df = fx - fy; // Compute the delta fitness
                 if (df <= 0) { // Better fitness than current solution
                     x = y; // Choose this solution as next solution
@@ -204,7 +211,6 @@ public class SolutionBuilder {
                 }
             }
             tk *= u; // Decrease temperature
-            System.out.println(fmax + " " + tk);
         }
         return xmax;
     }
@@ -213,6 +219,7 @@ public class SolutionBuilder {
         public int iterationCount;
         public int queueLength;
         public int neighbourCount;
+        public PrintWriter recorder;
     }
 
     /**
@@ -251,6 +258,11 @@ public class SolutionBuilder {
                     // save the neighbour if it is the best
                     x = neighbour;
                     int fx = x.fitness();
+
+                    if (parameters.recorder != null) {
+                        parameters.recorder.println(fx);
+                    }
+
                     if (fx > fmax) {
                         xmax = x;
                         fmax = fx;
