@@ -12,6 +12,8 @@ public class Solution {
     }
 
     public Solution(Solution solution) {
+        // Copy the solution to another
+        // Item references stay the same
         this.bins = new ArrayList<>(solution.bins.size());
         for (Bin bin : solution.bins) {
             this.bins.add(new Bin(bin));
@@ -55,13 +57,12 @@ public class Solution {
     public List<Solution> generateNeighbours(int count, Random rng) {
         List<Solution> neighbours = new ArrayList<>(count);
 
-        int validSolutions = 0;
-
         for (int i = 0; i < count; i++) {
             // Generate solution and random operator
             Solution solution = new Solution(this);
 
             try {
+                // Apply either a move operator or a swap operator
                 SolutionOperator operator;
                 if (rng.nextInt() % 2 == 0) {
                     operator = new SolutionMoveOperator();
@@ -73,13 +74,10 @@ public class Solution {
                 solution.lastOperator = operator;
 
                 neighbours.add(solution);
-                validSolutions++;
             } catch (UnsupportedOperationException e) {
-
+                // Rare case can be ignored
             }
         }
-
-//        System.out.println(validSolutions + "/" + count + " operators");
 
         return neighbours;
     }

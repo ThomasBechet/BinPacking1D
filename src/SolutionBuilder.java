@@ -36,6 +36,11 @@ public class SolutionBuilder {
         return solution;
     }
 
+    /**
+     * Use the LPSolve library to find the solution
+     * @param dataSet input dataset
+     * @return the best solution
+     */
     public static Solution findBestSolutionLpSolve(DataSet dataSet) {
         int nbItem = dataSet.getItems().size();
         int nbBin = nbItem;
@@ -45,6 +50,7 @@ public class SolutionBuilder {
             LpSolve solver = LpSolve.makeLp(nbItem + nbBin, totalVariable);
 
             // add constraints
+            System.out.println("Bins constraints: ");
 
             // bins constraints
             for (int j = 0; j < nbBin; j++) {
@@ -67,7 +73,7 @@ public class SolutionBuilder {
                 solver.strAddConstraint(constraint, LpSolve.LE, 0);
             }
 
-            System.out.println();
+            System.out.println("Items constraints: ");
 
             // items constraints
             for (int i = 0; i < nbItem; i++) {
@@ -89,7 +95,7 @@ public class SolutionBuilder {
                 solver.strAddConstraint(constraint, LpSolve.EQ, 1);
             }
 
-            System.out.println();
+            System.out.println("Objective function: ");
 
             // set objective function
             solver.setMinim();
@@ -109,17 +115,38 @@ public class SolutionBuilder {
             }
 
             // solve the problem
+            solver.setDebug(false);
             solver.solve();
 
             // print solution
             System.out.println("Value of objective function: " + (int)solver.getObjective());
             double[] var = solver.getPtrVariables();
-            for (int i = 0; i < var.length; i++) {
-                System.out.println("Value of var[" + i + "] = " + var[i]);
+
+            // build the solution from the variables
+            Solution solution = new Solution();
+
+            for (int binIndex = 0; binIndex < nbBin; binIndex++) {
+                // check if the bin is used
+                if ((int)var[nbItem * nbBin + binIndex] == 1) {
+                    // allocate a new bin
+                    Bin bin = new Bin(dataSet.getBinCapacity());
+                    // iterate over items
+                    for (int i = 0; i < nbItem; i++) {
+                        // if this item is included in the bin
+                        if ((int)var[i * nbBin + binIndex] == 1) {
+                            bin.add(dataSet.getItems().get(i));
+                        }
+                    }
+                    // add the bin to the solution
+                    solution.add(bin);
+                }
             }
 
             // delete the problem and free memory
             solver.deleteLp();
+
+            // return the solution
+            return solution;
         }
         catch (LpSolveException e) {
             e.printStackTrace();
@@ -139,6 +166,20 @@ public class SolutionBuilder {
         sortedDataSet.getItems().sort((a, b) -> b.getValue() - a.getValue());
 
         return SolutionBuilder.firstFit(sortedDataSet);
+    }
+
+    /**
+     * First fit using random input
+     * @param dataSet input dataset
+     * @param rng random
+     * @return the solution
+     */
+    public static Solution firstFitRandom(DataSet dataSet, Random rng) {
+        // Create random sorted
+        DataSet randomDataSet = new DataSet(dataSet);
+        Collections.shuffle(randomDataSet.getItems(), rng);
+
+        return SolutionBuilder.firstFit(randomDataSet);
     }
 
     /**
@@ -192,10 +233,6 @@ public class SolutionBuilder {
                 int fx = x.fitness();
                 int fy = y.fitness();
 
-                if (parameters.recorder != null) {
-                    parameters.recorder.println(fy);
-                }
-
                 float df = fx - fy; // Compute the delta fitness
                 if (df <= 0) { // Better fitness than current solution
                     x = y; // Choose this solution as next solution
@@ -204,10 +241,15 @@ public class SolutionBuilder {
                         fmax = fy;
                     }
                 } else { // Not better fitness, use the metropolis rule
+
                     float p = rng.nextFloat(); // Random float between 0.0 and 1.0
                     if (p <= Math.exp(-df / tk)) {
                         x = y;
                     }
+                }
+
+                if (parameters.recorder != null) {
+                    parameters.recorder.println(fx + " " + tk + " " + df);
                 }
             }
             tk *= u; // Decrease temperature
@@ -255,14 +297,16 @@ public class SolutionBuilder {
                         tabuQueue.removeLast();
                     }
 
-                    // save the neighbour if it is the best
+                    // Set the new neighbour as current solution
                     x = neighbour;
                     int fx = x.fitness();
 
+                    // Debug only
                     if (parameters.recorder != null) {
                         parameters.recorder.println(fx);
                     }
 
+                    // save the neighbour if it is the best
                     if (fx > fmax) {
                         xmax = x;
                         fmax = fx;

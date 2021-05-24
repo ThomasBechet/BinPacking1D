@@ -4,40 +4,44 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 public class SolutionMoveOperator implements SolutionOperator {
-    private Bin sourceBin;
-    private Bin targetBin;
-    private Item movedItem;
+    private int sourceBinIndex;
+    private int targetBinIndex;
+    private int movedItemIndex;
 
     @Override
     public void apply(Solution solution, Random rng) {
         // Initialize values
-        this.sourceBin = null;
-        this.targetBin = null;
-        this.movedItem = null;
+        Bin sourceBin = null;
+        Bin targetBin = null;
+        Item movedItem = null;
 
         // Generate possible target bins
         List<Bin> targetBins = solution.getBins().stream()
                 .filter(b -> b.getRemainingLength() > 0).collect(Collectors.toList());
 
-        while(targetBins.size() > 0 && (this.movedItem == null)) {
+        while(targetBins.size() > 0 && (movedItem == null)) {
             // Get a target bin with available space
-            this.targetBin = targetBins.remove(rng.nextInt(targetBins.size()));
-            int remainingLength = this.targetBin.getRemainingLength();
+            this.targetBinIndex = rng.nextInt(targetBins.size());
+            targetBin = targetBins.remove(this.targetBinIndex);
+            int remainingLength = targetBin.getRemainingLength();
 
             // Generate possible source bins
             List<Bin> sourceBins = new ArrayList<>(solution.getBins());
-            sourceBins.remove(this.targetBin);
+            sourceBins.remove(targetBin);
 
-            while (sourceBins.size() > 0 && (this.movedItem == null)) {
+            while (sourceBins.size() > 0 && (movedItem == null)) {
                 // Get a source bin
-                this.sourceBin = sourceBins.remove(rng.nextInt(sourceBins.size()));
+                this.sourceBinIndex = rng.nextInt(sourceBins.size());
+                sourceBin = sourceBins.remove(this.sourceBinIndex);
 
                 // Find a valid item
-                List<Item> items = new ArrayList<>(this.sourceBin.getItems());
+                List<Item> items = new ArrayList<>(sourceBin.getItems());
                 while (items.size() > 0) {
-                    Item item = items.remove(rng.nextInt(items.size()));
+                    int index = rng.nextInt(items.size());
+                    Item item = items.remove(index);
                     if (item.getValue() <= remainingLength) {
-                        this.movedItem = item;
+                        movedItem = item;
+                        this.movedItemIndex = index;
                         break;
                     }
                 }
@@ -45,19 +49,22 @@ public class SolutionMoveOperator implements SolutionOperator {
         }
 
         // Check operator failure
-        if (this.movedItem == null) {
+        if (movedItem == null) {
             // Create a new empty bin
             Bin bin = new Bin(solution.getBins().get(0).getCapacity());
+            this.targetBinIndex = solution.getBins().size();
 
             // Pick random bin
-            Bin sourceBin = solution.getBins().get(rng.nextInt(solution.getBins().size()));
+            this.sourceBinIndex = rng.nextInt(solution.getBins().size());
+            sourceBin = solution.getBins().get(this.sourceBinIndex);
 
             // Pick random item
-            Item item = sourceBin.getItems().get(rng.nextInt(sourceBin.getItems().size()));
+            this.movedItemIndex = rng.nextInt(sourceBin.getItems().size());
+            movedItem = sourceBin.getItems().get(this.movedItemIndex);
 
             // Move the item
-            bin.add(item);
-            sourceBin.remove(item);
+            bin.add(movedItem);
+            sourceBin.remove(movedItem);
 
             // Check source bin empty
             if (sourceBin.size() == 0) {
@@ -68,20 +75,20 @@ public class SolutionMoveOperator implements SolutionOperator {
         }
 
         // Move item
-        this.sourceBin.remove(this.movedItem);
-        if (this.sourceBin.size() == 0) {
-            solution.remove(this.sourceBin);
+        sourceBin.remove(movedItem);
+        if (sourceBin.size() == 0) {
+            solution.remove(sourceBin);
         }
-        this.targetBin.add(this.movedItem);
+        targetBin.add(movedItem);
     }
 
     @Override
     public boolean equals(SolutionOperator operator) {
         if (operator instanceof SolutionMoveOperator) {
             SolutionMoveOperator op = (SolutionMoveOperator)operator;
-            boolean sameBins0 = (this.sourceBin == op.sourceBin) && (this.targetBin == op.targetBin);
-            boolean sameBins1 = (this.sourceBin == op.targetBin) && (this.targetBin == op.sourceBin);
-            return (sameBins0 || sameBins1) && this.movedItem == op.movedItem;
+            boolean sameBins0 = (this.sourceBinIndex == op.sourceBinIndex) && (this.targetBinIndex == op.targetBinIndex);
+            boolean sameBins1 = (this.sourceBinIndex == op.targetBinIndex) && (this.targetBinIndex == op.sourceBinIndex);
+            return (sameBins0 || sameBins1) && this.movedItemIndex == op.movedItemIndex;
         }
         return false;
     }

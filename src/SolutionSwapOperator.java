@@ -3,18 +3,18 @@ import java.util.List;
 import java.util.Random;
 
 public class SolutionSwapOperator implements SolutionOperator {
-    private Bin firstBin;
-    private Bin secondBin;
-    private Item firstItem;
-    private Item secondItem;
+    private int firstBinIndex;
+    private int secondBinIndex;
+    private int firstItemIndex;
+    private int secondItemIndex;
 
     @Override
     public void apply(Solution solution, Random rng) {
         // Initialize values
-        this.firstBin = null;
-        this.secondBin = null;
-        this.firstItem = null;
-        this.secondItem = null;
+        Bin firstBin = null;
+        Bin secondBin = null;
+        Item firstItem = null;
+        Item secondItem = null;
 
         boolean found = false;
 
@@ -23,33 +23,37 @@ public class SolutionSwapOperator implements SolutionOperator {
 
         while (firstBins.size() > 0 && !found) {
             // Pick first bin
-            this.firstBin = firstBins.remove(rng.nextInt(firstBins.size()));
+            this.firstBinIndex = rng.nextInt(firstBins.size());
+            firstBin = firstBins.remove(firstBinIndex);
 
             // Create second bin list
             List<Bin> secondBins = new ArrayList<>(solution.getBins());
-            secondBins.remove(this.firstBin);
+            secondBins.remove(firstBin);
 
             while (secondBins.size() > 0 && !found) {
                 // Pick second bin
-                this.secondBin = secondBins.remove(rng.nextInt(secondBins.size()));
+                this.secondBinIndex = rng.nextInt(secondBins.size());
+                secondBin = secondBins.remove(this.secondBinIndex);
 
                 // Create first item list
-                List<Item> firstItems = new ArrayList<>(this.firstBin.getItems());
+                List<Item> firstItems = new ArrayList<>(firstBin.getItems());
 
                 while (firstItems.size() > 0 && !found) {
                     // Pick first item
-                    this.firstItem = firstItems.remove(rng.nextInt(firstItems.size()));
+                    this.firstItemIndex = rng.nextInt(firstItems.size());
+                    firstItem = firstItems.remove(this.firstItemIndex);
 
                     // Create second item list
-                    List<Item> secondItems = new ArrayList<>(this.secondBin.getItems());
+                    List<Item> secondItems = new ArrayList<>(secondBin.getItems());
 
                     while (secondItems.size() > 0 && !found) {
                         // Pick second item
-                        this.secondItem = secondItems.remove(rng.nextInt(secondItems.size()));
+                        this.secondItemIndex = rng.nextInt(secondItems.size());
+                        secondItem = secondItems.remove(this.secondItemIndex);
 
                         // Check solution
-                        if (this.secondItem.getValue() > (this.firstBin.getRemainingLength() + this.firstItem.getValue()) ||
-                            this.firstItem.getValue() > (this.secondBin.getRemainingLength() + this.secondItem.getValue())) {
+                        if (secondItem.getValue() > (firstBin.getRemainingLength() + firstItem.getValue()) ||
+                            firstItem.getValue() > (secondBin.getRemainingLength() + secondItem.getValue())) {
                             continue;
                         }
 
@@ -58,8 +62,6 @@ public class SolutionSwapOperator implements SolutionOperator {
                     }
                 }
             }
-
-
         }
 
         // Check operator failure
@@ -68,16 +70,16 @@ public class SolutionSwapOperator implements SolutionOperator {
         }
 
         // Move item
-        this.firstBin.remove(this.firstItem);
-        if (this.firstBin.size() == 0) {
-            solution.remove(this.firstBin);
+        firstBin.remove(firstItem);
+        if (firstBin.size() == 0) {
+            solution.remove(firstBin);
         }
-        this.secondBin.remove(this.secondItem);
-        if (this.secondBin.size() == 0) {
-            solution.remove(this.secondBin);
+        secondBin.remove(secondItem);
+        if (secondBin.size() == 0) {
+            solution.remove(secondBin);
         }
-        this.firstBin.add(this.secondItem);
-        this.secondBin.add(this.firstItem);
+        firstBin.add(secondItem);
+        secondBin.add(firstItem);
     }
 
     @Override
@@ -85,10 +87,10 @@ public class SolutionSwapOperator implements SolutionOperator {
         if (operator instanceof SolutionSwapOperator) {
             SolutionSwapOperator op = (SolutionSwapOperator)operator;
 
-            boolean sameBins0 = (this.firstBin == op.firstBin) && (this.secondBin == op.secondBin);
-            boolean sameBins1 = (this.firstBin == op.secondBin) && (this.secondBin == op.firstBin);
-            boolean sameItem0 = (this.firstItem == op.firstItem) && (this.secondItem == op.secondItem);
-            boolean sameItem1 = (this.firstItem == op.secondItem) && (this.secondItem == op.firstItem);
+            boolean sameBins0 = (this.firstBinIndex == op.firstBinIndex) && (this.secondBinIndex == op.secondBinIndex);
+            boolean sameBins1 = (this.firstBinIndex == op.secondBinIndex) && (this.secondBinIndex == op.firstBinIndex);
+            boolean sameItem0 = (this.firstItemIndex == op.firstItemIndex) && (this.secondItemIndex == op.secondItemIndex);
+            boolean sameItem1 = (this.firstItemIndex == op.secondItemIndex) && (this.secondItemIndex == op.firstItemIndex);
 
             return (sameBins0 || sameBins1) && (sameItem0 || sameItem1);
         }
