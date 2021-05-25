@@ -4,7 +4,7 @@
 
 - */data* : contient les jeux de données utiles aux tests.
 - */docs* : contient le sujet du projet ainsi que le rapport.
-- */lib* : contient la bibliothèque lp_solve, utile à la question 1 du projet. 
+- */lib* : contient la bibliothèque lp_solve, utile à la question 3 du projet. 
 - */scripts* : contient les scripts qui ont permis de créer les graphiques.
 - */src* : contient les sources du projet
 
